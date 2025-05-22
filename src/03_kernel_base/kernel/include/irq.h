@@ -104,4 +104,6 @@ void install_irq_handler(int number, irq_handler handler);
  */
 void uninstall_irq_handler(int number);
 
+void handler_teclado();
+
 #endif /* IRQ_H_ */

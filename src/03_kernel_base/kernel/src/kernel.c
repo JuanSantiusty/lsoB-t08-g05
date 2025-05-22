@@ -39,6 +39,9 @@ void cmain(){
 
     /* Configura la IDT y el PIC.interrupt.c */
     setup_interrupts();
+    
+    // Instala el manejador de IRQ1 para capturar eventos del teclado
+    install_irq_handler(1, handler_teclado);
 
     /* Completa la configuración de la memoria virtual. paging.c */
     setup_paging();
@@ -96,4 +99,32 @@ unsigned char traducir(unsigned char code){
         return 0;
     }
         return ascii_table[code];
+}
+
+//Función manejadora de la interrupción de teclado
+void handler_teclado() {
+    unsigned char status;
+    unsigned char code;
+    int is_break = 0;
+
+    status = inb(0x64);
+    if (!(status & 1)) {
+        return; 
+    }
+
+    code = inb(0x60);
+
+    if (code & 0x80) {
+        code -= 0x80;
+        is_break = 1;
+    }
+
+    procesar_modificadoras(code);
+
+    if (is_break && es_imprimible(code)) {
+        unsigned char ascii = traducir(code);
+        if (ascii) {
+            console_putchar(ascii);
+        }
+    }
 }
